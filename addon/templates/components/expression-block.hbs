@@ -1,0 +1,9 @@
+{{log block}}
+<div style="border:1px solid blue; width:5em;">
+  <b>{{block._guid}}</b>
+  {{expression-type selectedType=block.selectedType}}
+  <hr>
+  {{expression-value selectedValue=block.selectedValue}}
+</div>
+{{component horizontalOperation}}
+{{yield}}

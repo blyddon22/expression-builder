@@ -1,0 +1,12 @@
+{{yield}}
+
+<div style="margin:2em;">
+{{#each blocks as |block|}}
+  {{expression-block criterion=criterion types=types block=block}}
+{{/each}}
+</div>
+
+
+<div style="font-weight:300; font-size:2em">
+  {{expression}}
+</div>
