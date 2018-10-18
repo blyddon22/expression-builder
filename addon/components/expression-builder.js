@@ -4,6 +4,7 @@ import layout from '../templates/components/expression-builder';
 export default Ember.Component.extend({
   layout,
   tagName: '',
+  blockComponent: 'expression-block',
   addComponent: 'expression-add',
   deleteComponent: 'expression-delete',
   typeComponent: 'expression-builder-select',
@@ -25,14 +26,14 @@ export default Ember.Component.extend({
     })
     let exp = kv.join(' ');
     if(exp && Ember.get(this, 'expressionChanged')) {
-      Ember.get(this, 'expressionChanged')(exp);
+      Ember.get(this, 'expressionChanged')(exp, blocks);
     }
     return exp;
   }),
 
   init() {
     this._super(...arguments);
-    this.set('blocks', Ember.A([{}]));
+    this.set('blocks', Ember.A(this.preset || [{}]));
   },
 
   setBlockProperties(blocks, block) {

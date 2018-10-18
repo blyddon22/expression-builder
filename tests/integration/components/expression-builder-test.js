@@ -140,3 +140,61 @@ test('expressionChanged only fired when expression is something', function(asser
   assert.equal(this.$('.block-type select > option:selected').text().trim(), 'y');
   assert.equal(exp, 'y');
 });
+
+test('expressionChanged fired and returns blocks object when expression changes', function(assert) {
+  this.set('options', {'x': [1], 'y': [2, 3]});
+  var exp = null;
+  this.set('expressionChanged', (expression, blocks) => {exp=JSON.stringify(blocks)});
+  this.render(hbs`{{expression-builder options=options expressionChanged=expressionChanged}}`);
+  this.$('.block-type option[value="y"]').prop('selected', true).trigger('change');
+  assert.equal(this.$('.block-type select > option:selected').text().trim(), 'y');
+  assert.ok(exp.indexOf('"type":"y"') >= 0);
+});
+
+test('expressionChanged fired and returns blocks object when expression changes even if showExpression is false', function(assert) {
+  this.set('options', {'x': [1], 'y': [2, 3]});
+  var exp = null;
+  this.set('expressionChanged', (expression, blocks) => {exp=JSON.stringify(blocks)});
+  this.render(hbs`{{expression-builder options=options expressionChanged=expressionChanged showExpression=false}}`);
+  this.$('.block-type option[value="y"]').prop('selected', true).trigger('change');
+  assert.equal(this.$('.block-type select > option:selected').text().trim(), 'y');
+  assert.ok(exp.indexOf('"type":"y"') >= 0);
+});
+
+test('expressionChanged only fired and returns blocks object when expression is something', function(assert) {
+  this.set('options', {'x': [1], 'y': [2, 3]});
+  var exp = 'previous value';
+  this.set('expressionChanged', (expression, blocks) => {exp=JSON.stringify(blocks)});
+  this.render(hbs`{{expression-builder options=options expressionChanged=expressionChanged showExpression=false}}`);
+  assert.equal(exp, 'previous value');
+  this.$('.block-type option[value="y"]').prop('selected', true).trigger('change');
+  assert.equal(this.$('.block-type select > option:selected').text().trim(), 'y');
+  assert.ok(exp.indexOf('"type":"y"') >= 0);
+});
+
+test('can select a different index from the value', function(assert) {
+  Ember.getOwner(this).resolveRegistration('config:environment').expressionBuilder.valueIndex = 1
+  this.set('options', {'x': [1], 'y': [2, 3]});
+  this.render(hbs`{{expression-builder options=options valueComponent='expression-builder-select-array'}}`);
+  this.$('.block-type option[value="y"]').prop('selected', true).trigger('change');
+  this.$('.block-value option[value="3"]').prop('selected', true).trigger('change');
+  assert.equal(this.$('.expression-result').text().trim(), 'y:3');
+});
+
+test('can define a preset expression', function(assert) {
+  Ember.getOwner(this).resolveRegistration('config:environment').expressionBuilder.valueIndex = 1
+  this.set('options', {'x': [1], 'y': [2, 3]});
+  this.set('exp', [ { id: '', type: 'y', value: 3 } ]);
+  this.render(hbs`{{expression-builder options=options valueComponent='expression-builder-select-array' preset=exp}}`);
+  assert.equal(this.$('.expression-result').text().trim(), 'y:3');
+});
+
+test('correctly changes block of predefined expression', function(assert) {
+  Ember.getOwner(this).resolveRegistration('config:environment').expressionBuilder.valueIndex = 1
+  this.set('options', {'x': [1], 'y': [2, 3]});
+  this.set('exp', [ { id: 'un', type: 'y', value: 3 }, { id: 'du', type: 'x', value: 1 } ]);
+  this.render(hbs`{{expression-builder options=options valueComponent='expression-builder-select-array' preset=exp}}`);
+  assert.equal(this.$('.expression-result').text().trim(), 'y:3 x:1');
+  this.$('.block-value option[value="2"]').prop('selected', true).trigger('change');
+  assert.equal(this.$('.expression-result').text().trim(), 'y:2 x:1');
+});

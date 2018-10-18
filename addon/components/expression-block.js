@@ -6,7 +6,7 @@ export default Ember.Component.extend({
   tagName: '',
   emptyText: 'Pass options to select type',
   id: Ember.computed(function() {
-    return Ember.guidFor(Ember.getProperties(this, 'type', 'value'));
+    return Ember.get(this, 'block.id') || Ember.guidFor(Ember.getProperties(this, 'type', 'value'));
   }),
   hasType: Ember.computed('type', function() {
     return Ember.getWithDefault(this, 'type', false);
@@ -73,8 +73,9 @@ export default Ember.Component.extend({
       }
     },
 
-    valueChanged(value) {
-      Ember.set(this, 'value', value);
+    valueChanged(...args) {
+      let index = Ember.getOwner(this).resolveRegistration('config:environment').expressionBuilder.valueIndex;
+      Ember.set(this, 'value', args[index || 0]);
       this.updateBuilder();
     },
 
